@@ -21,3 +21,5 @@ const validateSlug = (slug) => {
   // 2. Must contain only alphanumeric characters and hyphens
   // 3. Should not match reserved keywords
 };
+
+module.exports = { generateSlug, validateSlug };

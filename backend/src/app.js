@@ -11,12 +11,11 @@ fastify.register(cors, { origin: true });
 
 // routes
 
-
 const start = async () => {
   try {
     fastify.listen({ port: PORT, host: "0.0.0.0" });
     // fastify.log.info("server run
-    console.log("object");
+    console.log("object", process.env.BASE_URL);
   } catch (error) {
     fastify.log.error(error);
     process.exit(1);
