@@ -50,6 +50,35 @@ const Url = {
     const { rows } = pool.query(query, [slug]);
     return rows[0];
   },
+
+  // UPDATE THE DESTINATION URL OR EXPIRATION DATE
+  async updateBySlug(slug, { original_url, expires_at }) {
+    const fields = [];
+    const values = [];
+    let index = 1;
+
+    if (original_url) {
+      fields.push(`original_url = $${index++}`);
+      values.push(original_url);
+    }
+
+    if (expires_at) {
+      fields.push(`expires_at = $${index++}`);
+      values.push(expires_at);
+    }
+
+    values.push(slug);
+
+    const query = `
+    UPDATE urls
+    SET ${fields.join(", ")}
+    WHERE slug = $${index}
+    RETURNING *
+    `;
+
+    const { rows } = await pool.query(query, values);
+    return rows[0];
+  },
 };
 
 module.exports = Url;
