@@ -27,20 +27,22 @@ fastify.post(
               "Must be 3-12 characters long,  Must contain only alphanumeric characters and hyphens, Should not match reserved keywords admin, api, help,login, signup",
           });
         }
-        //   check if slug exists
-        const existingSlug = await Url.findBySlug(slug);
-        if (existingSlug) {
-          return reply
-            .status(400)
-            .send({ error: `${slug} "already exists`, message: existingSlug });
-        }
+        // Handle slug collisions by appending suffix
         generatedSlug = slug;
+        let collisionCount = 0;
+
+        while (await Url.findBySlug(generatedSlug)) {
+          collisionCount++;
+          generatedSlug = `${slug}-${collisionCount}`;
+        }
       } else {
+        // Generate random slug if no custom slug provided
         generatedSlug = generateSlug();
       }
 
       const expirationDate =
         expires_at || new Date(new Date().setDate(new Date().getDate() + 30));
+
       const newUrl = await Url.create({
         slug: generatedSlug,
         original_url: long_url,
