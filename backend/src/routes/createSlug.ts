@@ -15,7 +15,12 @@ fastify.post(
   "/shorten",
   async (request: FastifyRequest<CreateSlugRequest>, reply: FastifyReply) => {
     const { long_url, slug, expires_at } = request.body;
-
+    if (!long_url) {
+      return reply.status(400).send({
+        error: `long_url is required`,
+        message: "Enter long_url to create a new slug",
+      });
+    }
     try {
       let generatedSlug: string;
       if (slug) {
@@ -24,7 +29,7 @@ fastify.post(
           return reply.status(400).send({
             error: `${slug} "is an invalide formate"`,
             message:
-              "Must be 3-12 characters long,  Must contain only alphanumeric characters and hyphens, Should not match reserved keywords admin, api, help,login, signup",
+              "Slug Must be 3-12 characters long , Must contain only letters (a-z, A-Z) and hyphens and Should not match reserved keywords: admin, api, help, login, signup, 404",
           });
         }
         // Handle slug collisions by appending suffix

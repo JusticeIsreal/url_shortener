@@ -26,7 +26,10 @@ app.put(
   async (request: FastifyRequest<UpdateSlugRequest>, reply: FastifyReply) => {
     const { slug } = request.params;
     const { long_url: original_url, expires_at } = request.body;
-
+    
+    if (!slug || !original_url || !expires_at) {
+      return reply.status(404).send({ error: `Enter slug dto get a redirect` });
+    }
     try {
       const updatedUrl = await Url.updateBySlug(slug, {
         original_url,

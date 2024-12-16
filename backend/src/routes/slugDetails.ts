@@ -19,7 +19,9 @@ fastify.get(
     reply: FastifyReply
   ) => {
     const { slug } = request.params;
-
+    if (!slug) {
+      return reply.status(404).send({ error: `Enter slug to get a details` });
+    }
     try {
       // find slug data from database
       const urlData = await Url.findBySlug(slug);

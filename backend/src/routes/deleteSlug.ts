@@ -16,6 +16,12 @@ fastify.delete(
   "/:slug",
   async (request: FastifyRequest<DeleteSlugRequest>, reply: FastifyReply) => {
     const { slug } = request.params;
+    if (!slug) {
+      return reply.status(400).send({
+        error: `slug is required`,
+        message: "Enter slug to delete a  slug",
+      });
+    }
     try {
       // delete route
       const deletedUrl = await Url.deleteBySlug(slug);

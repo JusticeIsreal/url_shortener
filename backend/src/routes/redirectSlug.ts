@@ -14,7 +14,9 @@ fastify.get(
   "/:slug",
   async (request: FastifyRequest<RedirectSlugRequest>, reply: FastifyReply) => {
     const { slug } = request.params;
-
+    if (!slug) {
+      return reply.status(404).send({ error: `Enter slug to get a redirect` });
+    }
     try {
       // check if slug value exists in database
       const urlData = await Url.findBySlug(slug);

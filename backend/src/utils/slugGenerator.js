@@ -1,6 +1,5 @@
-
-const generateSlug = (length = 4) => {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"; // Removed numbers
+const generateSlug = (length = 6) => {
+  const chars = "abcdefghijklmnopqrstuvwxyz";
   let slug = "";
   for (let i = 0; i < length; i++) {
     slug += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -10,8 +9,9 @@ const generateSlug = (length = 4) => {
 
 // Helper to validate slugs
 const validateSlug = (slug) => {
-  const reservedKeywords = ["admin", "api", "help", "login", "signup"];
-  const slugRegex = /^[a-zA-Z-]{3,12}$/; // Adjusted regex to exclude numbers
+  const reservedKeywords = ["admin", "api", "help", "login", "signup", "404"];
+  // Adjusted regex to exclude numbers
+  const slugRegex = /^[a-zA-Z-]{3,12}$/;
 
   return slugRegex.test(slug) && !reservedKeywords.includes(slug.toLowerCase());
 
