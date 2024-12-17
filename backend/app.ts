@@ -2,18 +2,17 @@ import Fastify, { FastifyInstance } from "fastify";
 import cors from "@fastify/cors";
 import fastifyEnv from "@fastify/env";
 import jwt from "@fastify/jwt";
-   // Import Routes
-    import shortenRoute from "./src/routes/createSlug";
-    import redirectRoute from "./src/routes/redirectSlug";
-    import detailsRoute from "./src/routes/slugDetails";
-    import deleteRoute from "./src/routes/deleteSlug";
-    import updateRoute from "./src/routes/updateSlug";
+// Import Routes
+import shortenRoute from "./src/routes/createSlug";
+import redirectRoute from "./src/routes/redirectSlug";
+import detailsRoute from "./src/routes/slugDetails";
+import deleteRoute from "./src/routes/deleteSlug";
+import updateRoute from "./src/routes/updateSlug";
 
-    import registerAdmin from "./src/plugins/auth/register";
-    import loginAdmin from "./src/plugins/auth/login";
-    import deleteAdmin from "./src/plugins/auth/deleteUser";
-    import authenticateRoutes from "./src/middlewares/authenticateRoutes";
-
+import registerAdmin from "./src/plugins/auth/register";
+import loginAdmin from "./src/plugins/auth/login";
+import deleteAdmin from "./src/plugins/auth/deleteUser";
+import authenticateRoutes from "./src/middlewares/authenticateRoutes";
 
 const fastify = Fastify({ logger: true });
 
@@ -54,7 +53,6 @@ const start = async () => {
       connectionString: fastify.config.DB_URL,
     });
 
- 
     // Global authentication hook
     authenticateRoutes(fastify);
 
@@ -76,7 +74,7 @@ const start = async () => {
       port: fastify.config.PORT,
       host: "0.0.0.0",
     });
-//@ts-ignore
+    //@ts-ignore
     console.log(`Server listening on http://localhost:${fastify.config.PORT}`);
   } catch (error) {
     fastify.log.error(error);

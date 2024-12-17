@@ -8,17 +8,16 @@ const generateSlug = (length = 6) => {
 };
 
 // Helper to validate slugs
-const validateSlug = (slug:string) => {
+const validateSlug = (slug: string): boolean => {
   const reservedKeywords = ["admin", "api", "help", "login", "signup", "404"];
-  // Adjusted regex to exclude numbers
-  const slugRegex = /^[a-zA-Z-]{3,12}$/;
 
+  // Updated regex:
+  // 1. Allows 3-12 characters
+  // 2. Can contain letters (a-z, A-Z), numbers (0-9), and at most one hyphen (-)
+  const slugRegex = /^(?!.*--)(?!^-)(?!.*-$)[a-zA-Z0-9-]{3,12}$/;
+
+  // Validate the slug against the regex and check for reserved keywords
   return slugRegex.test(slug) && !reservedKeywords.includes(slug.toLowerCase());
-
-  // Slug rules:
-  // 1. Must be 3-12 characters long
-  // 2. Must contain only letters (a-z, A-Z) and hyphens
-  // 3. Should not match reserved keywords
 };
 
 module.exports = { generateSlug, validateSlug };

@@ -1,73 +1,112 @@
-
-import UrlModel from "../models/urlModel"
 const { validateSlug, generateSlug } = require("../utils/slugGenerator");
 import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
+import UrlModel from "../models/urlModel";
+import { HttpStatus } from "../utils/httpStatus";
 
-// types
+// Define a TypeScript interface for request body
 interface CreateSlugRequest {
   Body: {
-    long_url: string;
+    original_url: string;
     slug?: string;
     expires_at?: string;
   };
 }
 
-async function routes (fastify:FastifyInstance) {
-   const Url = UrlModel(fastify.pg)
-  fastify.post(
-  "/shorten",
-  async (request: FastifyRequest<CreateSlugRequest>, reply: FastifyReply) => {
-    const { long_url, slug, expires_at } = request.body;
-    if (!long_url) {
-      return reply.status(400).send({
-        error: `long_url is required`,
-        message: "Enter long_url to create a new slug",
-      });
-    }
-    try {
-      let generatedSlug: string;
-      if (slug) {
-        // validate slug formate
-        if (!validateSlug(slug)) {
-          return reply.status(400).send({
-            error: `${slug} "is an invalide formate"`,
-            message:
-              "Slug Must be 3-12 characters long , Must contain only letters (a-z, A-Z) and hyphens and Should not match reserved keywords: admin, api, help, login, signup, 404",
-          });
-        }
-        // Handle slug collisions by appending suffix
-        generatedSlug = slug;
-        let collisionCount = 0;
+// Utility function to compute the expiration date
+const getDefaultExpirationDate = (): string => {
+  const now = new Date();
+  now.setDate(now.getDate() + 30); // Default to 30 days from now
+  return now.toISOString();
+};
 
-        while (await Url.findBySlug(generatedSlug)) {
-          collisionCount++;
-          generatedSlug = `${slug}-${collisionCount}`;
-        }
-      } else {
-        // Generate random slug if no custom slug provided
-        generatedSlug = generateSlug();
+/**
+ * Fastify route to shorten a long URL.
+ * @param fastify FastifyInstance - Fastify app instance
+ */
+async function routes(fastify: FastifyInstance) {
+  const Url = UrlModel(fastify.pg); // Initialize URL model with Fastify PG instance
+
+  /**
+   * POST /shorten
+   * Create a shortened URL
+   */
+  fastify.post(
+    "/shorten",
+    async (request: FastifyRequest<CreateSlugRequest>, reply: FastifyReply) => {
+      const { original_url, slug, expires_at } = request.body;
+
+      // Validate request body
+      if (!original_url) {
+        return reply.status(HttpStatus.BAD_REQUEST).send({
+          error: "original_url is required",
+          message: "Please provide a valid original URL to shorten.",
+        });
       }
 
-      const expirationDate =
-        expires_at || new Date(new Date().setDate(new Date().getDate() + 30));
+      try {
+        // Check if the original URL already exists
+        const existingUrl = await Url.findByLongUrl(original_url);
+        if (existingUrl) {
+          return reply.status(HttpStatus.CONFLICT).send({
+            error: "URL already exists",
+            message: "The provided long URL has already been shortened.",
+            data: existingUrl,
+          });
+        }
 
-      const newUrl = await Url.create({
-        slug: generatedSlug,
-        original_url: long_url,
-        expires_at: expirationDate as string,
-      });
+        let generatedSlug: string;
 
-      reply.status(200).send({
-        short_url: `${process.env.BASE_URL}/${generatedSlug}`,
-        expires_at: newUrl.expires_at,
-      });
-    } catch (error) {
-      console.error("Error updating URL:", error);
-      reply.status(500).send({ message: "Error in slug create", error });
+        // Validate and handle slug
+        if (slug) {
+          if (!validateSlug(slug)) {
+            return reply.status(HttpStatus.BAD_REQUEST).send({
+              error: "Invalid slug format",
+              message:
+                "Slug must be 3-12 characters long, contain only letters (a-z, A-Z) and hyphens, and avoid reserved keywords like admin, api, help, etc.",
+            });
+          }
+
+          // Handle slug collision
+          generatedSlug = slug;
+          let collisionCount = 0;
+          while (await Url.findBySlug(generatedSlug)) {
+            collisionCount++;
+            generatedSlug = `${slug?.toLowerCase()}-${collisionCount}`;
+          }
+        } else {
+          // Generate a random slug
+          generatedSlug = generateSlug();
+        }
+
+        // Set expiration date
+        const expirationDate = expires_at || getDefaultExpirationDate();
+
+        // Create a new shortened URL entry
+        const newUrl = await Url.create({
+          slug: generatedSlug?.toLowerCase(),
+          original_url,
+          expires_at: expirationDate,
+        });
+
+        // Validate BASE_URL configuration
+        if (!process.env.BASE_URL) {
+          throw new Error("BASE_URL environment variable is not defined.");
+        }
+
+        // Send success response
+        return reply.status(HttpStatus.OK).send({
+          short_url: `${process.env.BASE_URL}/${generatedSlug}`,
+          expires_at: newUrl.expires_at,
+        });
+      } catch (error) {
+        // Error handling
+        fastify.log.error(`Error creating shortened URL: ${error}`);
+        return reply
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .send({ message: "Internal server error", error: error });
+      }
     }
-  }
-);
-
+  );
 }
 
 export default routes;

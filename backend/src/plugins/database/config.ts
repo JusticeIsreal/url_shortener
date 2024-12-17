@@ -1,9 +1,9 @@
-import fastify from "fastify"
+import fastify from "fastify";
 
 //@ts-ignore
-const pool = fastify.pg
+const pool = fastify.pg;
 
-export default pool
+export default pool;
 // const { Pool } = require("pg");
 
 // const pool = new Pool({

@@ -1,4 +1,4 @@
-import { PostgresDb } from '@fastify/postgres'
+import { PostgresDb } from "@fastify/postgres";
 import { v4 as uuidv4 } from "uuid";
 
 interface UrlCreateParams {
@@ -42,6 +42,12 @@ const Url = (pool: PostgresDb) => ({
     const { rows } = await pool.query(query, [slug]);
     return rows[0];
   },
+  // FIND IF SLUG EXISTS IN DATABASE
+  async findByLongUrl(original_url: string) {
+    const query = `SELECT * FROM urls WHERE original_url = $1`;
+    const { rows } = await pool.query(query, [original_url]);
+    return rows[0];
+  },
 
   // INCREASE click_count AFTER A SUCCESSFUL SLUG REDIRECT
   async incrementClickCount(slug: string) {
@@ -62,7 +68,10 @@ const Url = (pool: PostgresDb) => ({
   },
 
   // UPDATE THE DESTINATION URL OR EXPIRATION DATE
-  async updateBySlug(slug: string, { original_url, expires_at }: UrlUpdateParams) {
+  async updateBySlug(
+    slug: string,
+    { original_url, expires_at }: UrlUpdateParams
+  ) {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
