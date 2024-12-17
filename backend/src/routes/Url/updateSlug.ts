@@ -1,6 +1,6 @@
 import fastify, { FastifyInstance } from "fastify";
 import { FastifyRequest, FastifyReply, RouteGenericInterface } from "fastify";
-import UrlModel  from "../models/urlModel";
+import UrlModel  from "../../models/urlModel";
 
 // Define the route parameter type
 interface UpdateSlugParams {

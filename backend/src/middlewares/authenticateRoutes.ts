@@ -6,8 +6,7 @@ function authenticateRoutes(fastify: FastifyInstance) {
     if (
       request.url === "/:slug" ||
       request.url === "/api/v1/register-user" ||
-      request.url === "/api/v1/shorten" ||
-      request.url === "/api/v1/login-user"
+      request.url === "/api/v1/login"
     ) {
       return;
     }

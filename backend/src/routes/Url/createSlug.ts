@@ -1,7 +1,7 @@
-const { validateSlug, generateSlug } = require("../utils/slugGenerator");
+const { validateSlug, generateSlug } = require("../../utils/slugGenerator");
 import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
-import UrlModel from "../models/urlModel";
-import { HttpStatus } from "../utils/httpStatus";
+import UrlModel from "../../models/urlModel";
+import { HttpStatus } from "../../utils/httpStatus";
 
 // Define a TypeScript interface for request body
 interface CreateSlugRequest {

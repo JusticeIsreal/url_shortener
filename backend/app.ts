@@ -3,15 +3,15 @@ import cors from "@fastify/cors";
 import fastifyEnv from "@fastify/env";
 import jwt from "@fastify/jwt";
 // Import Routes
-import shortenRoute from "./src/routes/createSlug";
-import redirectRoute from "./src/routes/redirectSlug";
-import detailsRoute from "./src/routes/slugDetails";
-import deleteRoute from "./src/routes/deleteSlug";
-import updateRoute from "./src/routes/updateSlug";
+import shortenRoute from "./src/routes/Url/createSlug";
+import redirectRoute from "./src/routes/Url/redirectSlug";
+import detailsRoute from "./src/routes/Url/slugDetails";
+import deleteRoute from "./src/routes/Url/deleteSlug";
+import updateRoute from "./src/routes/Url/updateSlug";
 
-import registerAdmin from "./src/plugins/auth/register";
-import loginAdmin from "./src/plugins/auth/login";
-import deleteAdmin from "./src/plugins/auth/deleteUser";
+import registerAdmin from "./src/routes/auth/register";
+import loginAdmin from "./src/routes/auth/login";
+import deleteAdmin from "./src/routes/auth/deleteUser";
 import authenticateRoutes from "./src/middlewares/authenticateRoutes";
 
 const fastify = Fastify({ logger: true });

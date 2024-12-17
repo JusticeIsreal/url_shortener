@@ -1,5 +1,5 @@
 // routes/details.js
-import UrlModel from "../models/urlModel"
+import UrlModel from "../../models/urlModel"
 import { FastifyRequest, FastifyReply, RouteGenericInterface, FastifyInstance } from "fastify";
 
 // types

@@ -1,7 +1,7 @@
 import  { FastifyInstance, FastifyReply, FastifyRequest, RouteGenericInterface } from "fastify";
 
 
-import UrlModel from "../models/urlModel"
+import UrlModel from "../../models/urlModel"
 
 interface RedirectSlugParams {
   slug: string;

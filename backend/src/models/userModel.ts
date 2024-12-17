@@ -8,7 +8,7 @@ interface UserCreateParams {
   password?: string;
   rank?: string;
 }
-const User = (pool: PostgresDb) => ( {
+const User = (pool: PostgresDb) => ({
   // CREATE USER AND TO DATABASE
   async create({ username, email, password, rank }: UserCreateParams) {
     const id = uuidv4();
@@ -28,13 +28,20 @@ const User = (pool: PostgresDb) => ( {
   },
 
   // FIND IF USER EXISTS IN DATABASE
-  async findByemail(email: string) {
+  async findById(id: string) {
+    const query = `SELECT * FROM users WHERE id = $1`;
+    const { rows } = await pool.query(query, [id]);
+
+    return rows[0];
+  },
+
+  // FIND IF USER EXISTS IN DATABASE
+  async findByEmail(email: string) {
     const query = `SELECT * FROM users WHERE email = $1`;
     const { rows } = await pool.query(query, [email]);
 
     return rows[0];
   },
-
   // DELETE SINGLE USER & ITS ROW FROM THE DATABASE
   async deleteByEmail(email: string) {
     const query = `DELETE FROM users WHERE email = $1 RETURNING *`;

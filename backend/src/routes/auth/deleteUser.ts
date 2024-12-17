@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import UserModel from "../../models/user";
+import UserModel from "../../models/userModel";
 
 async function routes(fastify: FastifyInstance) {
   // Define the JSON schema for validation
@@ -12,7 +12,7 @@ async function routes(fastify: FastifyInstance) {
       },
     },
   };
-  const User = UserModel(fastify.pg)
+  const User = UserModel(fastify.pg);
 
   fastify.post(
     "/delete-user",
@@ -22,8 +22,9 @@ async function routes(fastify: FastifyInstance) {
         try {
           await request.jwtVerify();
 
-          const user = request.user as { email: string };
-          const requester = await User.findByemail(user.email);
+           const user = request.user as { id: string };
+
+           const requester = await User.findById(user.id);
 
           if (!requester || requester.rank !== "super_admin") {
             return reply
@@ -46,13 +47,15 @@ async function routes(fastify: FastifyInstance) {
             .send({ message: "Enter email of the user you want to delete." });
         }
 
-        const userFound = await User.findByemail(email);
+          const user = request.user as { id: string };
 
-        if (!userFound) {
+          const requester = await User.findById(user.id);
+
+        if (!requester) {
           return reply.status(404).send({ message: "User not found." });
         }
 
-        if (userFound.rank === "super_admin") {
+        if (requester.rank === "super_admin") {
           return reply
             .status(403)
             .send({ message: "Cannot delete super_admin accounts." });
