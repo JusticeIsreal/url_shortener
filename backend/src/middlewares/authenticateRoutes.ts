@@ -1,19 +1,22 @@
-import fastify, { FastifyInstance } from 'fastify'
+import fastify, { FastifyInstance } from "fastify";
 
-function authenticateRoutes (fastify:FastifyInstance) {
+function authenticateRoutes(fastify: FastifyInstance) {
   fastify.addHook("onRequest", async (request, reply) => {
     // Skip authentication for specific routes
-    // console.log('request uyl',request.params)
-    if (request.url === "/api/v1/:slug" ||request.url === "/api/v1/register-user") {
-      return
+    if (
+      request.url === "/:slug" ||
+      request.url === "/api/v1/register-user" ||
+      request.url === "/api/v1/login-user"
+    ) {
+      return;
     }
 
     // Verify JWT token for all other routes
     try {
-      await request.jwtVerify()
-    } catch (err:any) {
-      reply.status(401).send({ error: "Unauthorized", message: err.message })
+      await request.jwtVerify();
+    } catch (err: any) {
+      reply.status(401).send({ error: "Unauthorized", message: err.message });
     }
-  })
+  });
 }
-export default authenticateRoutes
+export default authenticateRoutes;
