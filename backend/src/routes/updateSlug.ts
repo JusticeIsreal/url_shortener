@@ -1,6 +1,6 @@
-import fastify from "fastify";
+import fastify, { FastifyInstance } from "fastify";
 import { FastifyRequest, FastifyReply, RouteGenericInterface } from "fastify";
-import { Url } from "../models/urlModel";
+import UrlModel  from "../models/urlModel";
 
 // Define the route parameter type
 interface UpdateSlugParams {
@@ -19,9 +19,10 @@ interface UpdateSlugRequest extends RouteGenericInterface {
   Body: UpdateSlugBody;
 }
 
-const app = fastify();
 
-app.put(
+async function routes (fastify: FastifyInstance) {
+  const Url = UrlModel(fastify.pg)
+ fastify.put(
   "/:slug",
   async (request: FastifyRequest<UpdateSlugRequest>, reply: FastifyReply) => {
     const { slug } = request.params;
@@ -50,5 +51,8 @@ app.put(
     }
   }
 );
+}
 
-module.exports = app;
+
+
+export default routes;

@@ -1,7 +1,7 @@
-import { FastifyReply, FastifyRequest, RouteGenericInterface } from "fastify";
+import  { FastifyInstance, FastifyReply, FastifyRequest, RouteGenericInterface } from "fastify";
 
-const fastify = require("fastify");
-const Url = require("../models/urlModel");
+
+import UrlModel from "../models/urlModel"
 
 interface RedirectSlugParams {
   slug: string;
@@ -10,9 +10,10 @@ interface RedirectSlugParams {
 interface RedirectSlugRequest extends RouteGenericInterface {
   Params: RedirectSlugParams;
 }
-fastify.get(
-  "/:slug",
-  async (request: FastifyRequest<RedirectSlugRequest>, reply: FastifyReply) => {
+
+async function routes (fastify:FastifyInstance) {
+  const Url = UrlModel(fastify.pg)
+  fastify.get('/:slug', async (request: FastifyRequest<RedirectSlugRequest>, reply: FastifyReply) => {
     const { slug } = request.params;
     if (!slug) {
       return reply.status(404).send({ error: `Enter slug to get a redirect` });
@@ -34,7 +35,8 @@ fastify.get(
       console.error("Error updating URL:", error);
       reply.status(500).send({ message: "Error in slug redirect", error });
     }
-  }
-);
+  })
+}
 
-module.exports = fastify;
+
+export default routes;

@@ -1,7 +1,7 @@
-const fastify = require("fastify")();
-const Url = require("../models/urlModel");
+
+import UrlModel from "../models/urlModel"
 const { validateSlug, generateSlug } = require("../utils/slugGenerator");
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 
 // types
 interface CreateSlugRequest {
@@ -11,7 +11,10 @@ interface CreateSlugRequest {
     expires_at?: string;
   };
 }
-fastify.post(
+
+async function routes (fastify:FastifyInstance) {
+   const Url = UrlModel(fastify.pg)
+  fastify.post(
   "/shorten",
   async (request: FastifyRequest<CreateSlugRequest>, reply: FastifyReply) => {
     const { long_url, slug, expires_at } = request.body;
@@ -51,7 +54,7 @@ fastify.post(
       const newUrl = await Url.create({
         slug: generatedSlug,
         original_url: long_url,
-        expires_at: expirationDate,
+        expires_at: expirationDate as string,
       });
 
       reply.status(200).send({
@@ -65,4 +68,6 @@ fastify.post(
   }
 );
 
-module.exports = fastify;
+}
+
+export default routes;

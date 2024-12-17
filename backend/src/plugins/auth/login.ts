@@ -1,21 +1,20 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import jwt from "fastify-jwt";
 import pool from "../database/config";
 import bcrypt from "bcrypt";
-const fastify = require("fastify")();
 
 interface LoginBody {
   email: string;
   password: string;
 }
 
+async function routes (fastify:FastifyInstance) {
 fastify.post(
   "/login",
   async (request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply) => {
     const { email, password } = request.body;
     try {
       const query = `SELET * FROM users WHERE email =$1`;
-      const { rows } = await pool.query(query, [email]);
+      const { rows } = await fastify.pg.query(query, [email]);
       if (rows.length < 1) {
         return reply.status(401).send({ message: "Invalid email or password" });
       }
@@ -45,4 +44,7 @@ fastify.post(
     }
   }
 );
-module.exports = fastify;
+}
+
+
+export default routes;

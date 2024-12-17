@@ -1,4 +1,5 @@
-import pool from "../plugins/database/config";
+
+import { PostgresDb } from '@fastify/postgres'
 import { v4 as uuidv4 } from "uuid";
 
 interface UserCreateParams {
@@ -7,7 +8,7 @@ interface UserCreateParams {
   password?: string;
   rank?: string;
 }
-export const User = {
+const User = (pool: PostgresDb) => ( {
   // CREATE USER AND TO DATABASE
   async create({ username, email, password, rank }: UserCreateParams) {
     const id = uuidv4();
@@ -40,4 +41,6 @@ export const User = {
     const { rows } = await pool.query(query, [email]);
     return rows[0];
   },
-};
+});
+
+export default User

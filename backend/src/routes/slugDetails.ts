@@ -1,7 +1,6 @@
 // routes/details.js
-const fastify = require("fastify")();
-const Url = require("../models/url");
-import { FastifyRequest, FastifyReply, RouteGenericInterface } from "fastify";
+import UrlModel from "../models/urlModel"
+import { FastifyRequest, FastifyReply, RouteGenericInterface, FastifyInstance } from "fastify";
 
 // types
 interface DetailsOfSlugParams {
@@ -11,8 +10,9 @@ interface DetailsOfSlugParams {
 interface DetailsOfSlugRequest extends RouteGenericInterface {
   Params: DetailsOfSlugParams;
 }
-
-fastify.get(
+async function routes (fastify:FastifyInstance) {
+ const Url = UrlModel(fastify.pg)
+  fastify.get(
   "/details/:slug",
   async (
     request: FastifyRequest<DetailsOfSlugRequest>,
@@ -47,5 +47,7 @@ fastify.get(
     }
   }
 );
+}
 
-module.exports = fastify;
+
+export default routes;

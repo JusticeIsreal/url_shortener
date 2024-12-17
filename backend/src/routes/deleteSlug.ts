@@ -1,7 +1,6 @@
 // routes/delete.js
-const fastify = require("fastify")();
-const Url = require("../models/url");
-import { FastifyRequest, FastifyReply, RouteGenericInterface } from "fastify";
+import UrlModel from "../models/urlModel"
+import { FastifyRequest, FastifyReply, RouteGenericInterface, FastifyInstance } from "fastify";
 
 // types
 interface DeleteSlugParams {
@@ -12,7 +11,9 @@ interface DeleteSlugRequest extends RouteGenericInterface {
   Params: DeleteSlugParams;
 }
 
-fastify.delete(
+async function routes (fastify:FastifyInstance) {
+ const Url = UrlModel(fastify.pg)
+  fastify.delete(
   "/:slug",
   async (request: FastifyRequest<DeleteSlugRequest>, reply: FastifyReply) => {
     const { slug } = request.params;
@@ -36,5 +37,8 @@ fastify.delete(
     }
   }
 );
+}
 
-module.exports = fastify;
+
+
+export default routes;
