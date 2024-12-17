@@ -22,7 +22,7 @@ async function routes(fastify: FastifyInstance) {
         password: {
           type: "string",
           minLength: 2,
-          description: "Password (minimum 8 characters).",
+          description: "Password (minimum 2 characters).",
         },
         username: {
           type: "string",
@@ -74,7 +74,7 @@ async function routes(fastify: FastifyInstance) {
           return reply.status(HttpStatus.FORBIDDEN).send({
             error: "Unauthorized.",
             message:
-              "You can not create super_admin accounts, contact developer.",
+              "Nobody can create super_admin account, contact developer.",
           });
         }
 
@@ -100,7 +100,7 @@ async function routes(fastify: FastifyInstance) {
         });
       } catch (error) {
         reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
-          message: "Internal server error. Please try again later.",
+          message: "Internal server error from registration route.",
           error,
         });
       }

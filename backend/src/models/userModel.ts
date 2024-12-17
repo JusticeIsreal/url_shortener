@@ -20,7 +20,7 @@ const User = (pool: PostgresDb) => ({
       id,
       username,
       password,
-      email,
+      email,    
       rank,
       created_at,
     ]);

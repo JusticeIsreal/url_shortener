@@ -5,7 +5,6 @@ function authenticateRoutes(fastify: FastifyInstance) {
     // Skip authentication for specific routes
     if (
       request.url === "/:slug" ||
-      request.url === "/api/v1/register-user" ||
       request.url === "/api/v1/login"
     ) {
       return;
