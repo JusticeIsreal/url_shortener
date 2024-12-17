@@ -61,7 +61,7 @@ async function routes(fastify: FastifyInstance) {
 
       try {
         // check if user already exists in the system
-        const requesteredUser = await User.findByEmail(email);
+        const requesteredUser = await User.findByEmail(email?.toLowerCase());
         if (requesteredUser && requesteredUser.email === email) {
           return reply.status(HttpStatus.CONFLICT).send({
             error: `User already exist.`,
@@ -83,8 +83,8 @@ async function routes(fastify: FastifyInstance) {
 
         // Create the new user with rank defaulting to "admin"
         const newUser = await User.create({
-          email,
-          username,
+          email: email?.toLowerCase(),
+          username: username?.toLowerCase(),
           password: hashedPassword,
           rank: rank || "admin",
         });
@@ -93,8 +93,8 @@ async function routes(fastify: FastifyInstance) {
           message: "User registered successfully",
           user: {
             id: newUser.id,
-            email: newUser.email,
-            username: newUser.username,
+            email: newUser.email?.toLowerCase(),
+            username: newUser.username?.toLowerCase(),
             rank: newUser.rank,
           },
         });

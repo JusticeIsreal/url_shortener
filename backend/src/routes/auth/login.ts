@@ -38,7 +38,7 @@ async function routes(fastify: FastifyInstance) {
   fastify.post(
     "/login",
     {
-      schema: loginSchema, // Fastify schema validation
+      schema: loginSchema, 
     },
     async (
       request: FastifyRequest<{ Body: LoginBody }>,
@@ -52,7 +52,7 @@ async function routes(fastify: FastifyInstance) {
         const { rows } = await fastify.pg.query(query, [email]);
 
         // Check if user exists
-        if (rows.length === 0) {
+        if (rows?.length === 0) {
           return reply
             .status(401)
             .send({ message: "Invalid email or password." });
