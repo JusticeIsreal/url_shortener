@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import UserModel from "../../models/userModel";
-import { HttpStatus } from "../../utils/httpStatus"; // Assuming this is the location of the enum
+import { HttpStatus } from "../../utils/httpStatus"; 
 
 /**
  * DELETE USER ROUTE

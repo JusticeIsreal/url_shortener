@@ -1,8 +1,13 @@
-// routes/details.js
-import UrlModel from "../../models/urlModel"
-import { FastifyRequest, FastifyReply, RouteGenericInterface, FastifyInstance } from "fastify";
+import {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+  RouteGenericInterface,
+} from "fastify";
+import UrlModel from "../../models/urlModel";
+import { HttpStatus } from "../../utils/httpStatus";
 
-// types
+// Types for route parameters
 interface DetailsOfSlugParams {
   slug: string;
 }
@@ -10,44 +15,65 @@ interface DetailsOfSlugParams {
 interface DetailsOfSlugRequest extends RouteGenericInterface {
   Params: DetailsOfSlugParams;
 }
-async function routes (fastify:FastifyInstance) {
- const Url = UrlModel(fastify.pg)
+
+/**
+ * DETAILS ROUTE
+ * Fetches details of a URL associated with a given slug.
+ */
+async function routes(fastify: FastifyInstance) {
+  const Url = UrlModel(fastify.pg);
+
   fastify.get(
-  "/details/:slug",
-  async (
-    request: FastifyRequest<DetailsOfSlugRequest>,
-    reply: FastifyReply
-  ) => {
-    const { slug } = request.params;
-    if (!slug) {
-      return reply.status(404).send({ error: `Enter slug to get a details` });
-    }
-    try {
-      // find slug data from database
-      const urlData = await Url.findBySlug(slug);
-      if (!urlData) {
-        return reply.status(404).send({ error: "Slug not found." });
+    "/details/:slug",
+    async (
+      request: FastifyRequest<DetailsOfSlugRequest>,
+      reply: FastifyReply
+    ) => {
+      const { slug } = request.params;
+
+      // Validate the presence of the slug parameter
+      if (!slug) {
+        return reply.status(HttpStatus.BAD_REQUEST).send({
+          error: "Slug is required",
+          message: "Slug is required to fetch details.",
+        });
       }
 
-      if (new Date() > new Date(urlData.expires_at)) {
-        return reply.status(410).send({ error: "Link expired." });
-      }
+      try {
+        // Fetch the slug data from the database
+        const urlData = await Url.findBySlug(slug);
+        if (!urlData) {
+          return reply.status(HttpStatus.NOT_FOUND).send({
+            error: "Slug not found.",
+            message: `"${slug}" is not attached to any url in the system`,
+          });
+        }
 
-      reply.send({
-        long_url: urlData.original_url,
-        slug: urlData.slug,
-        short_url: `${process.env.BASE_URL}/${urlData.slug}`,
-        created_at: urlData.created_at,
-        expires_at: urlData.expires_at,
-        clicks: urlData.click_count,
-      });
-    } catch (error) {
-      console.error("Error updating URL:", error);
-      reply.status(500).send({ message: "Error in slug details", error });
+        // Check if the URL has expired
+        if (new Date() > new Date(urlData.expires_at)) {
+          return reply.status(HttpStatus.GONE).send({
+            error: "Link expired.",
+            message: `"${slug}" was only valid for 30 days`,
+          });
+        }
+
+        // Respond with URL details
+        reply.status(HttpStatus.OK).send({
+          long_url: urlData.original_url,
+          slug: urlData.slug,
+          short_url: `${process.env.BASE_URL}/${urlData.slug}`,
+          created_at: urlData.created_at,
+          expires_at: urlData.expires_at,
+          clicks: urlData.click_count,
+        });
+      } catch (error) {
+        console.error("Error fetching slug details:", error);
+        reply
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .send({ message: "Error fetching slug details.", error });
+      }
     }
-  }
-);
+  );
 }
-
 
 export default routes;
