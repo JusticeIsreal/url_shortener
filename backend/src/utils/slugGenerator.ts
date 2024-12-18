@@ -1,4 +1,5 @@
-const generateSlug = (length = 6) => {
+// generate slug for request body without slug value
+export const generateSlug = (length = 6) => {
   const chars = "abcdefghijklmnopqrstuvwxyz";
   let slug = "";
   for (let i = 0; i < length; i++) {
@@ -8,7 +9,7 @@ const generateSlug = (length = 6) => {
 };
 
 // Helper to validate slugs
-const validateSlug = (slug: string): boolean => {
+export const validateSlug = (slug: string): boolean => {
   const reservedKeywords = ["admin", "api", "help", "login", "signup", "404"];
 
   // Updated regex:
@@ -20,4 +21,11 @@ const validateSlug = (slug: string): boolean => {
   return slugRegex.test(slug) && !reservedKeywords.includes(slug.toLowerCase());
 };
 
-module.exports = { generateSlug, validateSlug };
+// generate expiration date for request without expiration date
+// Utility function to compute the expiration date
+export const getDefaultExpirationDate = (): string => {
+  const now = new Date();
+  now.setDate(now.getDate() + 30); // Default to 30 days from now
+  return now.toISOString();
+};
+

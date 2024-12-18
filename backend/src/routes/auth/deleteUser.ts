@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import UserModel from "../../models/userModel";
-import { HttpStatus } from "../../utils/httpStatus"; 
+import { HttpStatus } from "../../utils/httpStatus";
 
 /**
  * DELETE USER ROUTE
@@ -21,7 +21,7 @@ async function routes(fastify: FastifyInstance) {
   // Initialize the User model with database instance
   const User = UserModel(fastify.pg);
 
-  fastify.post(
+  fastify.delete(
     "/delete-user",
     {
       schema: deleteUserSchema,

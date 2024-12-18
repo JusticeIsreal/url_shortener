@@ -1,7 +1,8 @@
-const { validateSlug, generateSlug } = require("../../utils/slugGenerator");
+
 import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 import UrlModel from "../../models/urlModel";
 import { HttpStatus } from "../../utils/httpStatus";
+import { generateSlug, getDefaultExpirationDate, validateSlug } from "../../utils/slugGenerator";
 
 // Define a TypeScript interface for request body
 interface CreateSlugRequest {
@@ -12,19 +13,12 @@ interface CreateSlugRequest {
   };
 }
 
-// Utility function to compute the expiration date
-const getDefaultExpirationDate = (): string => {
-  const now = new Date();
-  now.setDate(now.getDate() + 30); // Default to 30 days from now
-  return now.toISOString();
-};
-
 /**
  * Fastify route to shorten a long URL.
  * @param fastify FastifyInstance - Fastify app instance
  */
 async function routes(fastify: FastifyInstance) {
-  const Url = UrlModel(fastify.pg); // Initialize URL model with Fastify PG instance
+  const Url = UrlModel(fastify.pg);
 
   /**
    * POST /shorten
