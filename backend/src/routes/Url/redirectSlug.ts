@@ -81,10 +81,6 @@ async function routes(fastify: FastifyInstance) {
       }
     }
   );
-
-  fastify.get("/firebase-messaging-sw.js", async (_, reply) => {
-    return reply.sendFile("firebase-messaging-sw.js"); // Ensure the file exists
-  });
 }
 
 export default routes;
