@@ -2,17 +2,18 @@ import Fastify, { FastifyInstance } from "fastify";
 import cors from "@fastify/cors";
 import fastifyEnv from "@fastify/env";
 import jwt from "@fastify/jwt";
+import path from "path";
 // Import Routes
 import shortenRoute from "./src/routes/Url/createSlug";
 import redirectRoute from "./src/routes/Url/redirectSlug";
 import detailsRoute from "./src/routes/Url/slugDetails";
 import deleteRoute from "./src/routes/Url/deleteSlug";
 import updateRoute from "./src/routes/Url/updateSlug";
-
 import registerAdmin from "./src/routes/auth/register";
 import loginAdmin from "./src/routes/auth/login";
 import deleteAdmin from "./src/routes/auth/deleteUser";
 import authenticateRoutes from "./src/middlewares/authenticateRoutes";
+import fastifyStatic from "@fastify/static";
 
 const fastify = Fastify({ logger: true });
 
@@ -41,7 +42,13 @@ const start = async () => {
 
     // Log the environment variables to ensure they are loaded
     //@ts-ignore
-    console.log("Environment Config:", fastify.config);
+    // console.log("Environment Config:", fastify.config);
+
+    // Serve static files from the "frontend" folder
+    fastify.register(fastifyStatic, {
+      root: path.join(__dirname, "./public"),
+      prefix: "/", // Serve files under the root path
+    });
 
     // Middleware registration
     fastify.register(cors, { origin: true });

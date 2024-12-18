@@ -3,11 +3,12 @@ import fastify, { FastifyInstance } from "fastify";
 function authenticateRoutes(fastify: FastifyInstance) {
   fastify.addHook("onRequest", async (request, reply) => {
     // Skip authentication for specific routes
+    const path = request.url;
     if (
-      request.url === "/:slug" ||
-      request.url === "/api/v1/login"
+      path === "/api/v1/login" || // Login route
+      /^\/[^/]+$/.test(path) // Match dynamic slug route (e.g., /shora)
     ) {
-      return;
+      return; // Skip authentication
     }
 
     // Verify JWT token for all other routes

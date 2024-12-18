@@ -1,42 +1,90 @@
-import  { FastifyInstance, FastifyReply, FastifyRequest, RouteGenericInterface } from "fastify";
+import {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+  RouteGenericInterface,
+} from "fastify";
+import UrlModel from "../../models/urlModel";
+import { HttpStatus } from "../../utils/httpStatus"; // Assuming HttpStatus is available here
 
-
-import UrlModel from "../../models/urlModel"
-
+// Define the route parameter type
 interface RedirectSlugParams {
   slug: string;
 }
 
+// Extend RouteGenericInterface for the request
 interface RedirectSlugRequest extends RouteGenericInterface {
   Params: RedirectSlugParams;
 }
 
-async function routes (fastify:FastifyInstance) {
-  const Url = UrlModel(fastify.pg)
-  fastify.get('/:slug', async (request: FastifyRequest<RedirectSlugRequest>, reply: FastifyReply) => {
-    const { slug } = request.params;
-    if (!slug) {
-      return reply.status(404).send({ error: `Enter slug to get a redirect` });
-    }
-    try {
-      // check if slug value exists in database
-      const urlData = await Url.findBySlug(slug);
-      if (!urlData) {
-        return reply.status(404).send({ error: `'${slug}' does not exit` });
+/**
+ * REDIRECT SLUG ROUTE
+ * Redirects to the original URL associated with the given slug.
+ */
+async function routes(fastify: FastifyInstance) {
+  const Url = UrlModel(fastify.pg);
+
+  fastify.get(
+    "/:slug",
+    async (
+      request: FastifyRequest<RedirectSlugRequest>,
+      reply: FastifyReply
+    ) => {
+      const { slug } = request.params;
+
+      // Validate required parameters
+      if (!slug) {
+        return reply.status(HttpStatus.BAD_REQUEST).send({
+          error: "Slug is required for redirection.",
+          message: "Please provide a valid slug.",
+        });
       }
-      if (new Date() > new Date(urlData.expires_at)) {
-        return reply.status(410).send({ error: "Link expired." });
+      // Validate required parameters
+      if (slug === "index.html") {
+        return reply
+          .status(HttpStatus.NOT_FOUND)
+          .type("text/html")
+          .sendFile("index.html");
       }
 
-      // Increase the click_count if slug value valid and avaliable
-      await Url.incrementClickCount(slug);
-      return reply.redirect(urlData.original_url);
-    } catch (error) {
-      console.error("Error updating URL:", error);
-      reply.status(500).send({ message: "Error in slug redirect", error });
+      try {
+        // Check if the slug exists in the database
+        const urlData = await Url.findBySlug(slug?.toLowerCase());
+
+        // Handle case where the slug does not exist
+        if (!urlData) {
+          return reply
+            .status(HttpStatus.NOT_FOUND)
+            .type("text/html")
+            .sendFile("404.html");
+        }
+
+        // Handle case where the link has expired
+        if (new Date() > new Date(urlData.expires_at)) {
+          return reply
+            .status(HttpStatus.NOT_FOUND)
+            .type("text/html")
+            .sendFile("404.html");
+        }
+
+        // Increment the click count
+        await Url.incrementClickCount(slug);
+
+        // Redirect to the original URL
+        return reply.redirect(urlData.original_url);
+      } catch (error) {
+        console.error("Error during redirection:", error);
+        reply.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+          message: "Internal server error during redirection.",
+          error,
+        });
+      }
     }
-  })
+  );
+
+  fastify.get("/firebase-messaging-sw.js", async (_, reply) => {
+    return reply.sendFile("firebase-messaging-sw.js"); // Ensure the file exists
+  });
 }
-
 
 export default routes;
