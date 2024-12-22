@@ -17,7 +17,7 @@ import updateRoute from "./src/routes/ActiveUrl/updateSlug";
 // expire url routes
 
 import purgeExpired from "./src/routes/ExpiredUrl/purgeDB";
-import allExpiredUrls from "./src/routes/ExpiredUrl/allExpiredUrls"
+import allExpiredUrls from "./src/routes/ExpiredUrl/allExpiredUrls";
 
 // Auth routes
 import registerAdmin from "./src/routes/auth/register";
@@ -52,19 +52,23 @@ const start = async () => {
     // Register the environment variables plugin first
     await fastify.register(fastifyEnv, options);
 
-    // Log the environment variables to ensure they are loaded
-    //@ts-ignore
-    // console.log("Environment Config:", fastify.config);
-    cron.schedule("0 0 * * *", async () => {
-      // Runs every day at midnight
+    // Database connection using fastify-postgres
+    await fastify.register(require("@fastify/postgres"), {
+      //@ts-ignore
+      connectionString: fastify.config.DB_URL,
+    });
+
+    // Run at midnight every day
+    cron.schedule("0 * * * *", async () => {
       try {
-        // @ts-ignore
-        const archivedLinks = await Url.purgeExpiredLinks();
+        const urlModel = Url(fastify.pg);
+        const archivedLinks = await urlModel.purgeExpiredLinks();
         console.log(`Archived ${archivedLinks.length} expired links.`);
       } catch (error) {
         console.error("Error archiving expired links:", error);
       }
     });
+
     // Serve static files from the "frontend" folder
     fastify.register(fastifyStatic, {
       root: path.join(__dirname, "./public"),
@@ -74,12 +78,6 @@ const start = async () => {
     // Middleware registration
     fastify.register(cors, { origin: true });
     fastify.register(jwt, { secret: "your-secret-key" });
-
-    // Database connection using fastify-postgres
-    await fastify.register(require("@fastify/postgres"), {
-      //@ts-ignore
-      connectionString: fastify.config.DB_URL,
-    });
 
     // Global authentication hook
     authenticateRoutes(fastify);
