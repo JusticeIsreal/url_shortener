@@ -51,8 +51,9 @@ const Url = (pool: PostgresDb) => ({
 
   // FIND IF SLUG EXISTS IN DATABASE
   async findBySlug(slug: string) {
-    const query = `SELECT * FROM urls WHERE slug = $1`;
+    const query = `SELECT * FROM urls WHERE slug = $1 COLLATE "C"`;
     const { rows } = await pool.query(query, [slug]);
+
     return rows[0];
   },
   // FIND IF SLUG EXISTS IN DATABASE
@@ -67,10 +68,23 @@ const Url = (pool: PostgresDb) => ({
     const query = `
       UPDATE urls
       SET click_count = click_count + 1
-      WHERE slug = $1 
-      AND original_url = (SELECT original_url FROM urls WHERE slug = $1)
+      WHERE id = (
+        SELECT id FROM urls 
+        WHERE slug = $1 
+        AND TRIM(slug) = TRIM($1)
+        AND slug ~ '^[a-zA-Z0-9-]+$'
+        AND slug = $1
+        AND id = (
+          SELECT id FROM urls 
+          WHERE slug = $1 
+          AND TRIM(slug) = TRIM($1)
+          ORDER BY created_at ASC 
+          LIMIT 1
+        )
+      )
       RETURNING *`;
     const { rows } = await pool.query(query, [slug]);
+
     return rows[0];
   },
 

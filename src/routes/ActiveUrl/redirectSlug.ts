@@ -32,19 +32,27 @@ async function routes(fastify: FastifyInstance) {
     ) => {
       const { slug } = request.params;
 
-      // Validate required parameters
-      if (!slug) {
-        return reply.status(HttpStatus.BAD_REQUEST).send({
-          error: "Slug is required for redirection.",
-          message: "Please provide a valid slug.",
-        });
+      // Check if this is a real user visit or browser pre-fetch
+      const purpose = request.headers.purpose || request.headers["sec-purpose"];
+      const isPrefetch =
+        purpose === "prefetch" ||
+        request.headers["sec-fetch-dest"] === "prefetch";
+
+      if (isPrefetch) {
+        // Don't increment count for prefetch requests
+        const urlData = await Url.findBySlug(slug);
+        if (!urlData) {
+          return reply
+            .status(HttpStatus.NOT_FOUND)
+            .type("text/html")
+            .sendFile("404.html");
+        }
+        return reply.redirect(urlData.original_url);
       }
 
+      // Rest of your existing code for actual visits
       try {
-        // Check if the slug exists in the database
         const urlData = await Url.findBySlug(slug);
-
-        // Handle case where the slug does not exist
         if (!urlData) {
           return reply
             .status(HttpStatus.NOT_FOUND)
@@ -52,7 +60,6 @@ async function routes(fastify: FastifyInstance) {
             .sendFile("404.html");
         }
 
-        // Handle case where the link has expired
         if (new Date() > new Date(urlData.expires_at)) {
           return reply
             .status(HttpStatus.GONE)
@@ -60,10 +67,8 @@ async function routes(fastify: FastifyInstance) {
             .sendFile("expired.html");
         }
 
-        // Increment the click count
+        // Only increment for actual user visits
         await Url.incrementClickCount(slug);
-
-        // Redirect to the original URL
         return reply.redirect(urlData.original_url);
       } catch (error) {
         console.error("Error during redirection:", error);
