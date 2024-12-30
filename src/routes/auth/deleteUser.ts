@@ -13,7 +13,7 @@ async function routes(fastify: FastifyInstance) {
       type: "object",
       required: ["email"],
       properties: {
-        email: { type: "string", format: "email" }, // Validate email format
+        email: { type: "string", format: "email" },
       },
     },
   };

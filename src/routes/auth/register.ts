@@ -123,7 +123,6 @@ function verifySuperAdmin(User: any) {
       if (!requester || requester.rank !== "super_admin") {
         return reply.status(HttpStatus.FORBIDDEN).send({
           message: "Only super_admin can register new users.",
-          requester,
         });
       }
     } catch (err) {

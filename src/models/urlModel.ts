@@ -136,6 +136,13 @@ const Url = (pool: PostgresDb) => ({
     const { rows } = await pool.query(query);
     return rows;
   },
+
+  // GET ALL ACTIVE URL DATA FROM DATABASE (PAGINATED)
+  async paginatedExpiredUrls(offset: number, limit: number) {
+    const query = `SELECT * FROM archived_urls ORDER BY created_at DESC LIMIT $1 OFFSET $2`;
+    const { rows } = await pool.query(query, [limit, offset]);
+    return rows;
+  },
 });
 
 export default Url;

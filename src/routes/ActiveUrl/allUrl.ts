@@ -4,16 +4,22 @@ import fastify, {
   FastifyRequest,
 } from "fastify";
 import UrlModel from "../../models/urlModel";
+
+import UserModel from "../../models/userModel";
 import { HttpStatus } from "../../utils/httpStatus";
 
 async function routes(fastify: FastifyInstance) {
   const Url = UrlModel(fastify.pg);
-
+  // Initialize the User model
+  const User = UserModel(fastify.pg);
   fastify.get(
     "/allurl",
+    {
+      preHandler: verifySuperAdmin(User),
+    },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        // Parse query parameters with defaults  
+        // Parse query parameters with defaults
         const { page = 1, limit = 100 } = request.query as {
           page?: string;
           limit?: string;
@@ -50,5 +56,28 @@ async function routes(fastify: FastifyInstance) {
       }
     }
   );
+}
+
+/**
+ * PreHandler Middleware: Verifies if the requester is a super_admin.
+ */
+function verifySuperAdmin(User: any) {
+  return async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      await request.jwtVerify();
+
+      const user = request.user as { id: string };
+
+      const requester = await User.findById(user.id);
+
+      if (!requester || requester.rank !== "super_admin") {
+        return reply.status(HttpStatus.FORBIDDEN).send({
+          message: "Only super_admin have access to this data",
+        });
+      }
+    } catch (err) {
+      return reply.status(401).send({ message: "Unauthorized access.", err });
+    }
+  };
 }
 export default routes;
