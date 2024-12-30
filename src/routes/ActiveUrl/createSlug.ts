@@ -41,16 +41,6 @@ async function routes(fastify: FastifyInstance) {
       }
 
       try {
-        // Check if the original URL already exists
-        // const existingUrl = await Url.findByLongUrl(original_url);
-        // if (existingUrl) {
-        //   return reply.status(HttpStatus.CONFLICT).send({
-        //     error: "URL already exists",
-        //     message: "The provided long URL has already been shortened.",
-        //     data: existingUrl,
-        //   });
-        // }
-
         let generatedSlug: string;
 
         // Validate and handle slug
