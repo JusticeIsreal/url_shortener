@@ -26,6 +26,7 @@ import deleteAdmin from "./src/routes/auth/deleteUser";
 
 // middleware routes
 import authenticateRoutes from "./src/middlewares/authenticateRoutes";
+import runMigrations from "./src/db/migrations";
 
 const fastify = Fastify({ logger: true });
 
@@ -57,6 +58,9 @@ const start = async () => {
       //@ts-ignore
       connectionString: fastify.config.DB_URL,
     });
+
+    // Run migrations
+    await runMigrations(fastify.pg.pool);
 
     // Run at midnight every day
     cron.schedule("0 * * * *", async () => {

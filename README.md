@@ -84,7 +84,6 @@ To authenticate requests:
 2. Include the token in subsequent requests using the `Authorization` header:
 ```
 
-
 ````
 
 ## ⚙️ Automated Tasks
@@ -101,17 +100,16 @@ The system includes an automated task that runs periodically to manage expired U
 ### URLs Table
 ```sql
 CREATE TABLE urls (
-id UUID PRIMARY KEY,
-slug VARCHAR(255) UNIQUE,
-original_url TEXT,
-created_at TIMESTAMP,
-expires_at TIMESTAMP,
-click_count INTEGER
+  id UUID PRIMARY KEY,
+  slug VARCHAR(255) UNIQUE,
+  original_url TEXT,
+  created_at TIMESTAMP,
+  expires_at TIMESTAMP,
+  click_count INTEGER DEFAULT 0
 );
-````
+```
 
 ### Archived URLs Table
-
 ```sql
 CREATE TABLE archived_urls (
   id UUID PRIMARY KEY,
@@ -119,9 +117,54 @@ CREATE TABLE archived_urls (
   original_url TEXT,
   created_at TIMESTAMP,
   expires_at TIMESTAMP,
-  click_count INTEGER,
-  archived_at TIMESTAMP
+  click_count INTEGER DEFAULT 0,
+  archived_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+```
+
+### Users Table
+```sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY,
+  email VARCHAR(255) UNIQUE,
+  username VARCHAR(255) UNIQUE,
+  password TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Migrations Table
+```sql
+CREATE TABLE migrations (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## 🗄️ Database Migrations
+
+The project uses an automated migration system to manage database schema changes. Migrations are located in the `migrations/` directory and run automatically on application startup.
+
+### Migration Files
+1. `20240315000000_create_tables.sql` - Creates initial database tables
+2. `20240315000001_add_slug_index.sql` - Adds performance indexes for slug lookups
+3. `20240315000002_add_url_indexes.sql` - Adds indexes for URL-related queries
+
+### Database Optimizations
+The following indexes are created for improved query performance:
+```sql
+-- Slug indexes
+CREATE INDEX idx_urls_slug ON urls(slug);
+CREATE INDEX idx_archived_urls_slug ON archived_urls(slug);
+
+-- URL indexes
+CREATE INDEX idx_urls_original_url ON urls(original_url);
+CREATE INDEX idx_archived_urls_original_url ON archived_urls(original_url);
+
+-- Composite indexes
+CREATE INDEX idx_urls_slug_url ON urls(slug, original_url);
+CREATE INDEX idx_archived_urls_slug_url ON archived_urls(slug, original_url);
 ```
 
 ## 🚦 Environment Variables
@@ -177,3 +220,4 @@ Each shortened URL tracks:
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+````
