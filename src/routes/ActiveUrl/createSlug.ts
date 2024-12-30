@@ -1,8 +1,11 @@
-
 import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 import UrlModel from "../../models/urlModel";
 import { HttpStatus } from "../../utils/httpStatus";
-import { generateSlug, getDefaultExpirationDate, validateSlug } from "../../utils/slugGenerator";
+import {
+  generateSlug,
+  getDefaultExpirationDate,
+  validateSlug,
+} from "../../utils/slugGenerator";
 
 // Define a TypeScript interface for request body
 interface CreateSlugRequest {
@@ -65,7 +68,7 @@ async function routes(fastify: FastifyInstance) {
           let collisionCount = 0;
           while (await Url.findBySlug(generatedSlug)) {
             collisionCount++;
-            generatedSlug = `${slug?.toLowerCase()}-${collisionCount}`;
+            generatedSlug = `${slug}-${collisionCount}`;
           }
         } else {
           // Generate a random slug
@@ -77,7 +80,7 @@ async function routes(fastify: FastifyInstance) {
 
         // Create a new shortened URL entry
         const newUrl = await Url.create({
-          slug: generatedSlug?.toLowerCase(),
+          slug: generatedSlug,
           original_url,
           expires_at: expirationDate,
         });

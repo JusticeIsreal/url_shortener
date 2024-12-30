@@ -39,17 +39,10 @@ async function routes(fastify: FastifyInstance) {
           message: "Please provide a valid slug.",
         });
       }
-      // Validate required parameters
-      if (slug === "index.html") {
-        return reply
-          .status(HttpStatus.NOT_FOUND)
-          .type("text/html")
-          .sendFile("index.html");
-      }
 
       try {
         // Check if the slug exists in the database
-        const urlData = await Url.findBySlug(slug?.toLowerCase());
+        const urlData = await Url.findBySlug(slug);
 
         // Handle case where the slug does not exist
         if (!urlData) {
@@ -62,9 +55,9 @@ async function routes(fastify: FastifyInstance) {
         // Handle case where the link has expired
         if (new Date() > new Date(urlData.expires_at)) {
           return reply
-            .status(HttpStatus.NOT_FOUND)
+            .status(HttpStatus.GONE)
             .type("text/html")
-            .sendFile("404.html");
+            .sendFile("expired.html");
         }
 
         // Increment the click count

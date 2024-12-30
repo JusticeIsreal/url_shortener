@@ -67,7 +67,8 @@ const Url = (pool: PostgresDb) => ({
     const query = `
       UPDATE urls
       SET click_count = click_count + 1
-      WHERE slug = $1
+      WHERE slug = $1 
+      AND original_url = (SELECT original_url FROM urls WHERE slug = $1)
       RETURNING *`;
     const { rows } = await pool.query(query, [slug]);
     return rows[0];

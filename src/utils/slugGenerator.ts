@@ -1,8 +1,8 @@
 // generate slug for request body without slug value
-export const generateSlug = (length = 6) => {
-  const chars = "abcdefghijklmnopqrstuvwxyz";
+export const generateSlug = () => {
+  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let slug = "";
-  for (let i = 0; i < length; i++) {
+  for (let i = 0; i < 4; i++) {
     slug += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return slug;
@@ -18,7 +18,7 @@ export const validateSlug = (slug: string): boolean => {
   const slugRegex = /^(?!.*--)(?!^-)(?!.*-$)[a-zA-Z0-9-]{3,12}$/;
 
   // Validate the slug against the regex and check for reserved keywords
-  return slugRegex.test(slug) && !reservedKeywords.includes(slug.toLowerCase());
+  return slugRegex.test(slug) && !reservedKeywords.includes(slug);
 };
 
 // generate expiration date for request without expiration date
@@ -28,4 +28,3 @@ export const getDefaultExpirationDate = (): string => {
   now.setDate(now.getDate() + 30); // Default to 30 days from now
   return now.toISOString();
 };
-

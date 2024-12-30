@@ -13,7 +13,7 @@ async function routes(fastify: FastifyInstance) {
     "/allurl",
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        // Parse query parameters with defaults
+        // Parse query parameters with defaults  
         const { page = 1, limit = 100 } = request.query as {
           page?: string;
           limit?: string;
